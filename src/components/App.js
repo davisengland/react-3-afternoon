@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import axios from 'axios'
 
 import './App.css';
 
 import Header from './Header/Header';
 import Compose from './Compose/Compose';
+import Post from './Post/Post';
 
 class App extends Component {
   constructor() {
@@ -19,23 +21,35 @@ class App extends Component {
   }
   
   componentDidMount() {
-
+    axios.get('https://practiceapi.devmountain.com/api/posts')
+      .then(res => {
+        // console.log(res)
+        this.setState({posts: res.data})
+      })
+      .catch(err => console.log(err))
   }
 
-  updatePost() {
-  
+  updatePost(id, text) {
+    axios.put(`https://practiceapi.devmountain.com/api/posts?id=${id}`, {text})
+      .then(res => this.setState({posts: res.data}))
+      .catch(err => console.log(err))
   }
 
-  deletePost() {
-
+  deletePost(id) {
+    axios.delete(`https://practiceapi.devmountain.com/api/posts?id=${id}`)
+      .then(res => this.setState({posts: res.data}))
+      .catch(err => console.log(err))
   }
 
-  createPost() {
-
+  createPost(text) {
+    axios.post(`https://practiceapi.devmountain.com/api/posts`, {text})
+      .then(res => this.setState({posts: res.data}))
+      .catch(err => console.log(err))
   }
 
   render() {
     const { posts } = this.state;
+    let activePosts = posts.map(elem => <Post key={elem.id} id={elem.id} text={elem.text} date={elem.date} updatePostFn={this.updatePost} deletePostFn={this.deletePost}/>)
 
     return (
       <div className="App__parent">
@@ -43,7 +57,9 @@ class App extends Component {
 
         <section className="App__content">
 
-          <Compose />
+          <Compose createPostFn={this.createPost}/>
+
+          {activePosts}
           
         </section>
       </div>
